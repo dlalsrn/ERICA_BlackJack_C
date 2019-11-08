@@ -1,4 +1,10 @@
-#include <stido.h>
+#include <stdio.h>
+
+typedef struct deck
+{
+	char shape;
+	char value;
+}Deck;
 
 int main(void)
 {
