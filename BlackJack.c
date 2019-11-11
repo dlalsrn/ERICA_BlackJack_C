@@ -12,9 +12,9 @@ void ary_swap(Deck* a, Deck* b) // n번째 와 0~n-1 사이의 임의의 수번�
 {
 	char Shape = a->shape;
 	char Num = a->value;
-	a->shpae = b->shape;
+	a->shape = b->shape;
 	a->value = b->value;
-	b->shpae = Shape;
+	b->shape = Shape;
 	b->value = Num;
 }
 
@@ -32,7 +32,7 @@ void ary_shuffle(Deck a[], int n) // 52장의 카드 덱을 무작위 섞어주�
 Deck hit(Deck a[], int n) // 덱에서 카드 한장을 반환해주는 함수
 {
 	Deck temp;
-	temp.shape = a[n].shpae; // 메인덱의 n번째 카드의 모양
+	temp.shape = a[n].shape; // 메인덱의 n번째 카드의 모양
 	temp.value = a[n].value; // 메인덱의 n번째 카드의 숫자
 	return temp;
 }
@@ -42,23 +42,49 @@ int more(void) // hit을 할때 더 hit할건지 물어보는 함수
 	char ch;
 	printf("hit? (y/n) : ");
 	scanf(" %c", &ch);
-	(ch == 'y') ? return 1 : return 0; // y를 입력했으면 1을 반환, 아니면 0 반환
+	(ch == 'y') ? 1 : 0; // y를 입력했으면 1을 반환, 아니면 0 반환
 }
 
 void show_cards(Deck a[])
 {
-	
+	for (int i = 0; a[i].value != 0; i++)
+		printf("  %c %c \n", a[i].shape, a[i].value); // i번째 카드의 모양과 수 출력
+	printf("\n");
 }
 
 int score(Deck a[])
 {
-	
+	int score = 0;
+	int ace = 0; // ace는 11 or 1로 계산하므로 내가 뽑은 ace의 개수를 저장하여 나중에 score 계산시 이용
+	for (int i = 0; a[i].value != 0; i++)
+	{
+		if (a[i].value == 'A' || a[i].value == 'J' || a[i].value == 'Q' || a[i].value == 'K' || a[i].value == 'T')
+		{
+			if (a[i].value == 'A') // 숫자가 A면 일단 11을 증가 후 에이스 1증가
+			{
+				ace++;
+				score += 11;
+			}
+			else
+				score += 10; // A가 아니면 10증가
+		}
+		else
+			score += a[i].value - 48; // 문자 0의 값이 48이므로 a[i].value에 -48을 해줘야함
+	}
+
+	for (int i = 0; i < ace; i++) // ace의 개수에 따라 점수를 빼주는 과정
+	{
+		if (score > 21) // ace가 포함됐을 때 스코어의 값이 21을 초과하면 -10을 해주어 ace를 1로 계산
+			score -= 10;
+		else
+			break; // ace가 있지만 21을 넘지 않을 때는 탈출
+	}
 }
 
 int main(void)
 {
 	char Shape[] = {'S', 'D', 'H', 'C'};
-	char Number[] = {'A', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
+	char Number[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
 	// 숫자 10을 영어 Ten의 T로 지정
 	Deck deck[52]; // 카드 52장을 넣을 덱 배열 선언;
 	Deck Player[10] = {0}; // 10장의 카드 덱을 선언함과 동시에 모두 0으로 초기화
@@ -66,5 +92,19 @@ int main(void)
 	Deck Dealer[10] = {0}; // 딜러의 카드 덱도 동일 (후에 동적 할당으로 변환)
 	int Player_score = 0; // 플레이어의 카드 덱 숫자의 합
 	int Dealer_score = 0; // 딜러의 카드 덱 숫자의 합
+	
+	for (int i = 0; i < 4; i++)
+	{
+		for (int s = 0; s < 13; s++)
+		{
+			deck[i*13+s].shape = Shape[i]; // 0번째 부터 51번째 까지 각 모양마다 A~K까지 카드를 하나씩 만들어주는 과정
+			deck[i*13+s].value = Number[s];
+		}
+	}
+
+	ary_shuffle(deck, 52); // 순서대로 만들어진 52장의 카드를 무작위로 섞어주는 함수 호출
+
+	for (int i = 0; i < 52; i++)
+		printf("%c %c\n", deck[i].shape, deck[i].value); // 섞어준 후 잘 섞였는지 테스트
 	return 0;
 }
