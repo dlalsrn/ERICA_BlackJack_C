@@ -22,7 +22,7 @@ void ary_shuffle(Deck a[], int n) // 52장의 카드 덱을 무작위 섞어주�
 {
 	int i, j;
 	srand((unsigned int)time(NULL)); // 난수 시드 생성
-	for (i = n-1; i > n; i--)
+	for (i = n-1; i > 0; i--)
 	{
 		j = rand() % (i+1); // 0~n-1 사이의 임의의 수를 뽑아냄
 		ary_swap(&a[i], &a[j]); // swap 함수에 i, j번째 카드를 주어 서로 바꿔줌
