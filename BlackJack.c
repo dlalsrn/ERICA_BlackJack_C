@@ -79,6 +79,7 @@ int score(Deck a[])
 		else
 			break; // ace가 있지만 21을 넘지 않을 때는 탈출
 	}
+	return score;
 }
 
 int main(void)
@@ -92,7 +93,9 @@ int main(void)
 	Deck Dealer[10] = {0}; // 딜러의 카드 덱도 동일 (후에 동적 할당으로 변환)
 	int Player_score = 0; // 플레이어의 카드 덱 숫자의 합
 	int Dealer_score = 0; // 딜러의 카드 덱 숫자의 합
-	
+	int count = 0; // main함수의 52장 카드덱의 인덱스 번호 참조 변수 (후에 동적 할당으로 바꾸면서 없앨 것)
+	printf("Welcome to Casino!! \n\n");
+
 	for (int i = 0; i < 4; i++)
 	{
 		for (int s = 0; s < 13; s++)
@@ -103,8 +106,31 @@ int main(void)
 	}
 
 	ary_shuffle(deck, 52); // 순서대로 만들어진 52장의 카드를 무작위로 섞어주는 함수 호출
-
+	/*
 	for (int i = 0; i < 52; i++)
 		printf("%c %c\n", deck[i].shape, deck[i].value); // 섞어준 후 잘 섞였는지 테스트
+	*/
+	int py_count = 2; // 플레이어의 덱 인덱스 번호
+	//플레이어와 딜러는 시작할때 무조건 2장 받고 시작하므로 인덱스 번호가 2부터 시작
+	int dl_count = 2;
+
+	for (int i = 0; i < 2; i++) // 플레이어와 딜러의 덱에 각각 2장씩 분배
+	{
+		Player[i] = hit(deck, count); // 메인 함수의 deck과 인덱스 번호를 매개변수로 넘겨줌
+		count++; // 메인 덱 인덱스 +1
+		Dealer[i] = hit(deck, count);
+		count++; // 메인 덱 인덱스 +1
+	}
+
+	printf("Dealer cards\n"); // 딜러의 첫 카드는 안보여주고 두 번째 카드만 보여줌
+	printf("  **** ** \n");
+	printf("  %c %c \n\n", Dealer[1].shape, Dealer[1].value);
+
+	printf("Player cards\n");
+	show_cards(Player); // 플레이어의 현재 카드 출력
+
+	Player_score = score(Player); // 플레이어 카드의 숫자 합
+	Dealer_score = score(Dealer); // 딜러 카드의 숫자 합
+	printf("Player : %d, Dealer : %d \n", Player_score, Dealer_score); // 테스트용 스코어 출력
 	return 0;
 }
