@@ -42,7 +42,10 @@ int more(void) // hit을 할때 더 hit할건지 물어보는 함수
 	char ch;
 	printf("hit? (y/n) : ");
 	scanf(" %c", &ch);
-	(ch == 'y') ? 1 : 0; // y를 입력했으면 1을 반환, 아니면 0 반환
+	if (ch == 'y')
+		return 1; // y를 입력했으면 1을 반환, 아니면 0 반환
+	else
+		return 0;
 }
 
 void show_cards(Deck a[])
@@ -112,7 +115,7 @@ int main(void)
 	*/
 	int py_count = 2; // 플레이어의 덱 인덱스 번호
 	//플레이어와 딜러는 시작할때 무조건 2장 받고 시작하므로 인덱스 번호가 2부터 시작
-	int dl_count = 2;
+	int dl_count = 2; // 딜러의 덱 인덱스 번호
 
 	for (int i = 0; i < 2; i++) // 플레이어와 딜러의 덱에 각각 2장씩 분배
 	{
@@ -131,6 +134,53 @@ int main(void)
 
 	Player_score = score(Player); // 플레이어 카드의 숫자 합
 	Dealer_score = score(Dealer); // 딜러 카드의 숫자 합
-	printf("Player : %d, Dealer : %d \n", Player_score, Dealer_score); // 테스트용 스코어 출력
+	//printf("Player : %d, Dealer : %d \n", Player_score, Dealer_score); // 테스트용 스코어 출력
+	
+	if (Player_score == 21)
+		printf("BlackJakc! Player Win!!\n"); // 처음받은 카드 2장의 합이 21이면 바로 승리
+	else
+	{
+		while(Player_score <21) // 카드의 합이 21이하면 카드를 더 받을지 hit을 출력하며 물어보는 함수 호출
+		{
+			if (more())
+			{
+				Player[py_count] = hit(deck, count);
+				printf("  %c %c\n", Player[py_count].shape, Player[py_count].value); // 받을 카드 출력
+				py_count++; // 플레이어 카드 덱의 인덱스 번호 +1
+				count++; // 메인 카드 덱의 인덱스 번호 +1
+				Player_score = score(Player); // 플레이어 덱의 스코어 다시 계산
+			}
+			else
+				break; // n을 입력하면 탈출
+		}
+
+		if (Player_score > 21) // 합이 21초과면 패배
+			printf("\nPlayer Bust! Dealer Win!!\n");
+		else
+		{
+			while (Dealer_score <= 16) // 딜러는 카드의 합이 무조건 16 이상이어함
+			{
+				Dealer[dl_count] = hit(deck, count);
+				dl_count++;
+				count++;
+				Dealer_score = score(Dealer); // 카드 합 다시 계산
+			}
+
+			printf("\nDealer cards\n");
+			show_cards(Dealer); // 딜러의 모든 카드 출력
+
+			if (Dealer_score > 21)
+				printf("Dealer Bust! Player Win!!\n");
+			else if (Dealer_score == Player_score)
+				printf("Draw!!\n");
+			else if (Player_score > Dealer_score)
+				printf("Player Win!!\n");
+			else
+				printf("Dealer Win!!\n");
+		}
+	}
+
+	printf("\nPlayer score : %d\n", Player_score);
+	printf("Dealer score : %d\n", Dealer_score);
 	return 0;
 }
