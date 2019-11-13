@@ -16,12 +16,12 @@ typedef struct Node // 카드덱을 연결리스트로 구현하기 위해 구�
 
 void Add_Node(node* head, Deck card) // 카드를 하나씩 이어주는 함수
 {
-	if (head == NULL)
+	if (head->card.shape == 0) // 맨 첫번 째
 	{
 		head->card = card;
 		head->next = NULL;
 	}
-	else
+	else // 두 번째 카드 부터
 	{
 		if (head->next != NULL)
 			Add_Node(head->next, card);
@@ -35,24 +35,26 @@ void Add_Node(node* head, Deck card) // 카드를 하나씩 이어주는 함수
 	}
 }	
 
-void ary_swap(Deck* a, Deck* b) // n번째 와 0~n-1 사이의 임의의 수번째 카드를 바꿔주는 함수
+void ary_swap(node* a, node* b) // n번째 와 0~n-1 사이의 임의의 수번째 카드를 바꿔주는 함수
 {
-	char Shape = a->shape;
-	char Num = a->value;
-	a->shape = b->shape;
-	a->value = b->value;
-	b->shape = Shape;
-	b->value = Num;
+	Deck temp = a->card;
+	a->card = b->card;
+	b->card = temp;
 }
 
-void ary_shuffle(Deck a[], int n) // 52장의 카드 덱을 무작위 섞어주는 함수
+void ary_shuffle(node* deck) // 52장의 카드 덱을 무작위 섞어주는 함수
 {
 	int i, j;
 	srand((unsigned int)time(NULL)); // 난수 시드 생성
-	for (i = n-1; i > 0; i--)
+	node * temp1 = deck; // 첫번째 노드부터 마지막 노드까지 차례대로 참조할 포인터
+	for (i = 0; i < 52; i++)
 	{
-		j = rand() % (i+1); // 0~n-1 사이의 임의의 수를 뽑아냄
-		ary_swap(&a[i], &a[j]); // swap 함수에 i, j번째 카드를 주어 서로 바꿔줌
+		node * temp2 = deck; // 임의의 j번째 노드를 참조할 포인터
+		j = rand() % (52); // 0~51 사이의 임의의 수를 뽑아냄
+		for (int s = 0; s < j; s++)
+			temp2 = temp2->next; // j만큼 주소를 이동하여 j번째 카드의 위치로 이동
+		ary_swap(temp1, temp2); // temp1와 temp2 주소 안에 있는 카드를 바꿈
+		temp1 = temp1->next; // n번째 카드를 j번째와 스왑했다면 n+1번째 카드로 이동... 반복
 	}
 }
 
@@ -77,8 +79,8 @@ int more(void) // hit을 할때 더 hit할건지 물어보는 함수
 
 void show_cards(node* cards)
 {
-	for (; cards != NULL; cards = cards->next)
-		printf("  %c %c \n", cards->card.shape, cards->card.value); // i번째 카드의 모양과 수 출력
+	for (int i = 1; cards != NULL; cards = cards->next, i++)
+		printf("%d  %c %c \n", i, cards->card.shape, cards->card.value); // 카드의 모양과 수 출력
 	printf("\n");
 }
 
@@ -117,14 +119,12 @@ int main(void)
 	char Shape[] = {'S', 'D', 'H', 'C'};
 	char Number[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
 	// 숫자 10을 영어 Ten의 T로 지정
-	//Deck deck[52]; // 카드 52장을 넣을 덱 배열 선언;
 	node* deck = (node*)malloc(sizeof(node)); // 카드 덱 동적할당을 위해 선언한 deck 포인터
-	//Deck Player[10] = {0}; // 10장의 카드 덱을 선언함과 동시에 모두 0으로 초기화
-	                       // 현재는 10개의 배열을 고정으로 선언 (나중에 동적 할당으로 변환할 것)
-	//Deck Dealer[10] = {0}; // 딜러의 카드 덱도 동일 (후에 동적 할당으로 변환)
+	deck->card.shape = 0; // 아무것도 안받은 상태로 초기화
+	node* Player = (node*)malloc(sizeof(node)); // 플레이어의 덱
+	node* Dealer = (node*)malloc(sizeof(node)); // 딜러의 덱
 	int Player_score = 0; // 플레이어의 카드 덱 숫자의 합
 	int Dealer_score = 0; // 딜러의 카드 덱 숫자의 합
-	//int count = 0; // main함수의 52장 카드덱의 인덱스 번호 참조 변수 (후에 동적 할당으로 바꾸면서 없앨 것)
 	printf("Welcome to Casino!! \n\n");
 
 	for (int i = 0; i < 4; i++)
@@ -137,16 +137,10 @@ int main(void)
 			Add_Node(deck, card); // deck이라는 포인터에 카드를 하나씩 연결시켜주는 함수 호출
 		}
 	}
-	show_cards(deck); // 카드가 제대로 이어지고 출력이 되는지 확인하는 함수
-	
+	show_cards(deck);
+	ary_shuffle(deck); // 순서대로 만들어진 52장의 카드를 무작위로 섞어주는 함수 호출
+	show_cards(deck); // 잘 섞였는지 출력 테스트
 	/*
-	ary_shuffle(deck, 52); // 순서대로 만들어진 52장의 카드를 무작위로 섞어주는 함수 호출
-	
-	for (int i = 0; i < 52; i++)
-		printf("%c %c\n", deck[i].shape, deck[i].value); // 섞어준 후 잘 섞였는지 테스트
-	int py_count = 2; // 플레이어의 덱 인덱스 번호
-	//플레이어와 딜러는 시작할때 무조건 2장 받고 시작하므로 인덱스 번호가 2부터 시작
-	int dl_count = 2; // 딜러의 덱 인덱스 번호
 
 	for (int i = 0; i < 2; i++) // 플레이어와 딜러의 덱에 각각 2장씩 분배
 	{
