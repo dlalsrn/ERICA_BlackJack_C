@@ -58,12 +58,13 @@ void ary_shuffle(node* deck) // 52장의 카드 덱을 무작위 섞어주는 �
 	}
 }
 
-Deck hit(Deck a[], int n) // 덱에서 카드 한장을 반환해주는 함수
+void hit(node** head, node* deck) // 덱에서 카드 한장을 반환해주는 함수
 {
-	Deck temp;
-	temp.shape = a[n].shape; // 메인덱의 n번째 카드의 모양
-	temp.value = a[n].value; // 메인덱의 n번째 카드의 숫자
-	return temp;
+	Deck card = (*head)->card; // 메인 덱의 맨 첫 번째 카드
+	node* temp = *head; // 맨 첫 번째 노드 주소 배정
+	*head = (*head)->next; // 첫 번째 카드를 줬으니 그 다음 노드로 옮김
+	free(temp); // 카드를 배정했으니 주소를 풀어줌
+	Add_Node(deck, card); // 플레이어나 딜러의 덱에 card를 한장 배부
 }
 
 int more(void) // hit을 할때 더 hit할건지 물어보는 함수
@@ -123,6 +124,8 @@ int main(void)
 	deck->card.shape = 0; // 아무것도 안받은 상태로 초기화
 	node* Player = (node*)malloc(sizeof(node)); // 플레이어의 덱
 	node* Dealer = (node*)malloc(sizeof(node)); // 딜러의 덱
+	Player->card.shape = 0; // 아무것도 안받은 상태로 초기화
+	Dealer->card.shape = 0; //            ' '
 	int Player_score = 0; // 플레이어의 카드 덱 숫자의 합
 	int Dealer_score = 0; // 딜러의 카드 덱 숫자의 합
 	printf("Welcome to Casino!! \n\n");
@@ -140,16 +143,17 @@ int main(void)
 	show_cards(deck);
 	ary_shuffle(deck); // 순서대로 만들어진 52장의 카드를 무작위로 섞어주는 함수 호출
 	show_cards(deck); // 잘 섞였는지 출력 테스트
-	/*
 
 	for (int i = 0; i < 2; i++) // 플레이어와 딜러의 덱에 각각 2장씩 분배
 	{
-		Player[i] = hit(deck, count); // 메인 함수의 deck과 인덱스 번호를 매개변수로 넘겨줌
-		count++; // 메인 덱 인덱스 +1
-		Dealer[i] = hit(deck, count);
-		count++; // 메인 덱 인덱스 +1
+		hit(&deck, Player); // 플레이어에게 한장 배부
+		hit(&deck, Dealer); // 그후 딜러에게 한장 배부
 	}
 
+	show_cards(deck); // 4장이 사라졌는지 출력 테스트
+	show_cards(Player); // 2장이 배부됐는데 출력 테스트
+	show_cards(Dealer); //           ' '
+	/*
 	printf("Dealer cards\n"); // 딜러의 첫 카드는 안보여주고 두 번째 카드만 보여줌
 	printf("  **** ** \n");
 	printf("  %c %c \n\n", Dealer[1].shape, Dealer[1].value);
