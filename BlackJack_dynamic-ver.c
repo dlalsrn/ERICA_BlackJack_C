@@ -61,10 +61,10 @@ void ary_shuffle(node* deck) // 52장의 카드 덱을 무작위 섞어주는 �
 void hit(node** head, node* deck) // 덱에서 카드 한장을 반환해주는 함수
 {
 	Deck card = (*head)->card; // 메인 덱의 맨 첫 번째 카드
-	node* temp = *head; // 맨 첫 번째 노드 주소 배정
+	node* temp = *head; // 메인덱의 맨 첫 번째 노드 주소 배정
 	*head = (*head)->next; // 첫 번째 카드를 줬으니 그 다음 노드로 옮김
 	free(temp); // 카드를 배정했으니 주소를 풀어줌
-	Add_Node(deck, card); // 플레이어나 딜러의 덱에 card를 한장 배부
+	Add_Node(deck, card); // 플레이어나 딜러의 덱에 card를 한장 추가
 }
 
 int more(void) // hit을 할때 더 hit할건지 물어보는 함수
@@ -80,20 +80,20 @@ int more(void) // hit을 할때 더 hit할건지 물어보는 함수
 
 void show_cards(node* cards)
 {
-	for (int i = 1; cards != NULL; cards = cards->next, i++)
-		printf("%d  %c %c \n", i, cards->card.shape, cards->card.value); // 카드의 모양과 수 출력
+	for (int i = 1; cards != NULL; cards = cards->next)
+		printf("  %c %c \n", cards->card.shape, cards->card.value); // 카드의 모양과 수 출력
 	printf("\n");
 }
 
-int score(Deck a[])
+int score(node* deck)
 {
 	int score = 0;
 	int ace = 0; // ace는 11 or 1로 계산하므로 내가 뽑은 ace의 개수를 저장하여 나중에 score 계산시 이용
-	for (int i = 0; a[i].value != 0; i++)
+	for (; deck != NULL; deck = deck->next)
 	{
-		if (a[i].value == 'A' || a[i].value == 'J' || a[i].value == 'Q' || a[i].value == 'K' || a[i].value == 'T')
+		if (deck->card.value == 'A' || deck->card.value == 'J' || deck->card.value == 'Q' || deck->card.value == 'K' || deck->card.value == 'T')
 		{
-			if (a[i].value == 'A') // 숫자가 A면 일단 11을 증가 후 에이스 1증가
+			if (deck->card.value == 'A') // 숫자가 A면 일단 11을 증가 후 에이스 1증가
 			{
 				ace++;
 				score += 11;
@@ -102,7 +102,7 @@ int score(Deck a[])
 				score += 10; // A가 아니면 10증가
 		}
 		else
-			score += a[i].value - 48; // 문자 0의 값이 48이므로 a[i].value에 -48을 해줘야함
+			score += deck->card.value - 48; // 문자 0의 값이 48이므로 a[i].value에 -48을 해줘야함
 	}
 
 	for (int i = 0; i < ace; i++) // ace의 개수에 따라 점수를 빼주는 과정
@@ -140,31 +140,31 @@ int main(void)
 			Add_Node(deck, card); // deck이라는 포인터에 카드를 하나씩 연결시켜주는 함수 호출
 		}
 	}
-	show_cards(deck);
+	//show_cards(deck);
 	ary_shuffle(deck); // 순서대로 만들어진 52장의 카드를 무작위로 섞어주는 함수 호출
-	show_cards(deck); // 잘 섞였는지 출력 테스트
+	//show_cards(deck); // 잘 섞였는지 출력 테스트
 
 	for (int i = 0; i < 2; i++) // 플레이어와 딜러의 덱에 각각 2장씩 분배
 	{
 		hit(&deck, Player); // 플레이어에게 한장 배부
 		hit(&deck, Dealer); // 그후 딜러에게 한장 배부
 	}
-
+	/*
 	show_cards(deck); // 4장이 사라졌는지 출력 테스트
 	show_cards(Player); // 2장이 배부됐는데 출력 테스트
 	show_cards(Dealer); //           ' '
-	/*
+	*/
 	printf("Dealer cards\n"); // 딜러의 첫 카드는 안보여주고 두 번째 카드만 보여줌
 	printf("  **** ** \n");
-	printf("  %c %c \n\n", Dealer[1].shape, Dealer[1].value);
+	printf("  %c %c \n\n", (Dealer->next)->card.shape, (Dealer->next)->card.value);
 
 	printf("Player cards\n");
 	show_cards(Player); // 플레이어의 현재 카드 출력
 
 	Player_score = score(Player); // 플레이어 카드의 숫자 합
 	Dealer_score = score(Dealer); // 딜러 카드의 숫자 합
-	//printf("Player : %d, Dealer : %d \n", Player_score, Dealer_score); // 테스트용 스코어 출력
-	
+	printf("Player : %d, Dealer : %d \n", Player_score, Dealer_score); // 테스트용 스코어 출력
+	/*
 	if (Player_score == 21)
 		printf("BlackJakc! Player Win!!\n"); // 처음받은 카드 2장의 합이 21이면 바로 승리
 	else
