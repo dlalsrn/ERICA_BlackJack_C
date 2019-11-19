@@ -136,6 +136,16 @@ void Create_deck(node* deck) // 메인 함수에서 생성하는 52장의 카드
     }
 }
 
+void Free(node* deck) // 할당받았던 메모리 공간을 반환해주는 함수
+{
+	node* temp;
+	for (; deck != NULL; deck = deck->next) // 반환했으면 다음 주소로 이동
+	{
+		temp = deck;
+		free(temp);
+	}
+}
+
 int main(void)
 {
 	node* deck = (node*)malloc(sizeof(node)); // 카드 덱 동적할당을 위해 선언한 node형 deck 포인터
@@ -151,64 +161,112 @@ int main(void)
 	Create_deck(deck); // 새로운 52장의 카드 덱 생성
 	ary_shuffle(deck); // 순서대로 만들어진 52장의 카드를 무작위로 섞어주는 함수 호출
 	
-	for (int i = 0; i < 2; i++) // 플레이어와 딜러의 덱에 각각 2장씩 분배
+	while (1)
 	{
-		hit(&deck, Player); // 플레이어에게 한장 배부
-		hit(&deck, Dealer); // 그후 딜러에게 한장 배부
-	}
-	
-	printf("Dealer cards\n"); // 딜러의 첫 카드는 안보여주고 두 번째 카드만 보여줌
-	printf("  * * \n");
-	printf("  %c %c \n\n", (Dealer->next)->card.shape, (Dealer->next)->card.value);
-
-	printf("Player cards\n");
-	show_cards(Player); // 플레이어의 현재 카드 출력
-
-	Player_score = score(Player); // 플레이어 카드의 숫자 합
-	Dealer_score = score(Dealer); // 딜러 카드의 숫자 합
-
-	if (Player_score == 21)
-		printf("BlackJakc! Player Win!!\n"); // 처음받은 카드 2장의 합이 21이면 바로 승리
-	else
-	{
-		while(Player_score <21) // 카드의 합이 21이하면 카드를 더 받을지 hit을 출력하며 물어보는 함수 호출
+		for (int i = 0; i < 2; i++) // 플레이어와 딜러의 덱에 각각 2장씩 분배
 		{
-			if (more("hit?"))
+			if (deck == NULL) // 만약 52장의 카드를 다 나눠줬다면 다시 52장의 카드 덱 생성
 			{
-				printf("  %c %c\n", deck->card.shape, deck->card.value); // 받을 카드 출력
-				hit(&deck, Player); // 카드를 추가
-				Player_score = score(Player); // 플레이어 덱의 스코어 다시 계산
+				deck = (node*)malloc(sizeof(node)); // 초기 상태로 초기화
+				deck->card.shape = 0;
+				Create_deck(deck);
+				ary_shuffle(deck);
 			}
-			else
-				break; // n을 입력하면 탈출
+			hit(&deck, Player); // 플레이어에게 한장 배부
+			if (deck == NULL) 
+			{
+                deck = (node*)malloc(sizeof(node));
+                deck->card.shape = 0;
+                Create_deck(deck);
+                ary_shuffle(deck);
+            } 
+			hit(&deck, Dealer); // 그후 딜러에게 한장 배부
 		}
+	
+		printf("Dealer cards\n"); // 딜러의 첫 카드는 안보여주고 두 번째 카드만 보여줌
+		printf("  * * \n");
+		printf("  %c %c \n\n", (Dealer->next)->card.shape, (Dealer->next)->card.value);
 
-		if (Player_score > 21) // 합이 21초과면 패배
-			printf("\nPlayer Bust! Dealer Win!!\n");
+		printf("Player cards\n");
+		show_cards(Player); // 플레이어의 현재 카드 출력
+
+		Player_score = score(Player); // 플레이어 카드의 숫자 합
+		Dealer_score = score(Dealer); // 딜러 카드의 숫자 합
+
+		if (Player_score == 21)
+			printf("BlackJakc! Player Win!!\n"); // 처음받은 카드 2장의 합이 21이면 바로 승리
 		else
 		{
-			while (Dealer_score <= 16) // 딜러는 카드의 합이 무조건 16 이상이어함
+			while(Player_score <21) // 카드의 합이 21이하면 카드를 더 받을지 hit을 출력하며 물어보는 함수 호출
 			{
-				hit(&deck, Dealer);
-				Dealer_score = score(Dealer); // 카드 합 다시 계산
+				if (more("hit?"))
+				{
+					if (deck == NULL)
+            		{
+                		deck = (node*)malloc(sizeof(node));
+                		deck->card.shape = 0;
+                		Create_deck(deck);
+                		ary_shuffle(deck);
+            		}
+					printf("  %c %c\n", deck->card.shape, deck->card.value); // 받을 카드 출력
+					hit(&deck, Player); // 카드를 추가
+					Player_score = score(Player); // 플레이어 덱의 스코어 다시 계산
+				}
+				else
+					break; // n을 입력하면 탈출
 			}
 
-			printf("\nDealer cards\n");
-			show_cards(Dealer); // 딜러의 모든 카드 출력
-
-			if (Dealer_score > 21) // 플레이어와 딜러의 합 비교
-				printf("Dealer Bust! Player Win!!\n");
-			else if (Dealer_score == Player_score)
-				printf("Draw!!\n");
-			else if (Player_score > Dealer_score)
-				printf("Player Win!!\n");
+			if (Player_score > 21) // 합이 21초과면 패배
+				printf("\nPlayer Bust! Dealer Win!!\n");
 			else
-				printf("Dealer Win!!\n");
+			{
+				while (Dealer_score <= 16) // 딜러는 카드의 합이 무조건 16 이상이어함
+				{
+					if (deck == NULL)
+             		{
+                 		deck = (node*)malloc(sizeof(node));
+                 		deck->card.shape = 0;
+                 		Create_deck(deck);
+                 		ary_shuffle(deck);
+             		} 
+					hit(&deck, Dealer);
+					Dealer_score = score(Dealer); // 카드 합 다시 계산
+				}
+
+				printf("\nDealer cards\n");
+				show_cards(Dealer); // 딜러의 모든 카드 출력
+
+				if (Dealer_score > 21) // 플레이어와 딜러의 합 비교
+					printf("Dealer Bust! Player Win!!\n");
+				else if (Dealer_score == Player_score)
+					printf("Draw!!\n");
+				else if (Player_score > Dealer_score)
+					printf("Player Win!!\n");
+				else
+					printf("Dealer Win!!\n");
+			}
+		}
+		
+		printf("\nPlayer score : %d\n", Player_score);
+        printf("Dealer score : %d\n", Dealer_score);
+
+		if (more("\n더 하시겠습니까?")) // 한 게임이 끝난 후 더할건지 물어봄
+		{
+			printf("\n");
+			Free(Player); // 플레이어의 카드 덱 초기화
+			Free(Dealer); // 딜러의 카드 덱 초기화
+			Player = (node*)malloc(sizeof(node)); // 초기 상태로 초기화
+			Dealer = (node*)malloc(sizeof(node));
+			Player->card.shape = 0;
+			Dealer->card.shape = 0;
+			Player_score = 0;
+			Dealer_score = 0;
+		}
+		else // n이면 반복문 탈출
+		{
+			printf("안녕히 가십시오.\n");
+			break;
 		}
 	}
-
-	printf("\nPlayer score : %d\n", Player_score);
-	printf("Dealer score : %d\n", Dealer_score);
-	
 	return 0;
 }
