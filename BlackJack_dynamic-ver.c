@@ -16,7 +16,7 @@ typedef struct Node // 카드덱을 연결리스트로 구현하기 위해 구�
 
 void Add_Node(node* head, Deck card) // 카드를 하나씩 이어주는 함수
 {
-	if (head->card.shape == 0) // 맨 첫번 째
+	if (head->card.shape == 0) // 아무 카드도 안받은 상태일 때
 	{
 		head->card = card;
 		head->next = NULL;
@@ -67,15 +67,20 @@ void hit(node** head, node* deck) // 덱에서 카드 한장을 반환해주는 
 	Add_Node(deck, card); // 플레이어나 딜러의 덱에 card를 한장 추가
 }
 
-int more(void) // hit을 할때 더 hit할건지 물어보는 함수
+int more(char* message) // hit을 할때 더 hit할건지 물어보는 함수
 {
 	char ch;
-	printf("hit? (y/n) : ");
+	printf("%s (y/n) : ", message);
 	scanf(" %c", &ch);
-	if (ch == 'y')
-		return 1; // y를 입력했으면 1을 반환, 아니면 0 반환
-	else
-		return 0;
+	do
+	{
+		if (ch == 'y')
+			return 1; // y를 입력했으면 1을 반환, 아니면 0 반환
+		else if (ch == 'n')
+			return 0;
+		else
+			printf("y나 n을 입력해주십시오\n");
+	}while (1);
 }
 
 void show_cards(node* cards)
@@ -115,11 +120,29 @@ int score(node* deck)
 	return score;
 }
 
+void Create_deck(node* deck) // 메인 함수에서 생성하는 52장의 카드 덱을 하나의 함수로 구현
+{
+	char Shape[] = {'S', 'D', 'H', 'C'}; 
+	char Number[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
+	for (int i = 0; i < 4; i++)
+    {
+        for (int s = 0; s < 13; s++)
+        {   
+            Deck card; 
+            card.shape = Shape[i];
+            card.value = Number[s]; // 각 모양마다 A~K까지 카드를 하나씩 만들어주는 과정
+            Add_Node(deck, card); // deck이라는 포인터에 카드를 하나씩 연결시켜주는 함수 호출
+		}
+    }
+}
+
 int main(void)
 {
+	/*
 	char Shape[] = {'S', 'D', 'H', 'C'};
 	char Number[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
 	// 숫자 10을 영어 Ten의 T로 지정
+	*/
 	node* deck = (node*)malloc(sizeof(node)); // 카드 덱 동적할당을 위해 선언한 deck 포인터
 	deck->card.shape = 0; // 아무것도 안받은 상태로 초기화
 	node* Player = (node*)malloc(sizeof(node)); // 플레이어의 덱
@@ -129,31 +152,16 @@ int main(void)
 	int Player_score = 0; // 플레이어의 카드 덱 숫자의 합
 	int Dealer_score = 0; // 딜러의 카드 덱 숫자의 합
 	printf("Welcome to Casino!! \n\n");
-
-	for (int i = 0; i < 4; i++)
-	{
-		for (int s = 0; s < 13; s++)
-		{
-			Deck card;
-			card.shape = Shape[i];
-			card.value = Number[s]; // 각 모양마다 A~K까지 카드를 하나씩 만들어주는 과정
-			Add_Node(deck, card); // deck이라는 포인터에 카드를 하나씩 연결시켜주는 함수 호출
-		}
-	}
-	//show_cards(deck);
+	
+	Create_deck(deck); // 새로운 52장의 카드 덱 생성
 	ary_shuffle(deck); // 순서대로 만들어진 52장의 카드를 무작위로 섞어주는 함수 호출
-	//show_cards(deck); // 잘 섞였는지 출력 테스트
-
+	
 	for (int i = 0; i < 2; i++) // 플레이어와 딜러의 덱에 각각 2장씩 분배
 	{
 		hit(&deck, Player); // 플레이어에게 한장 배부
 		hit(&deck, Dealer); // 그후 딜러에게 한장 배부
 	}
-	/*
-	show_cards(deck); // 4장이 사라졌는지 출력 테스트
-	show_cards(Player); // 2장이 배부됐는데 출력 테스트
-	show_cards(Dealer); //           ' '
-	*/
+	
 	printf("Dealer cards\n"); // 딜러의 첫 카드는 안보여주고 두 번째 카드만 보여줌
 	printf("  **** ** \n");
 	printf("  %c %c \n\n", (Dealer->next)->card.shape, (Dealer->next)->card.value);
@@ -163,7 +171,6 @@ int main(void)
 
 	Player_score = score(Player); // 플레이어 카드의 숫자 합
 	Dealer_score = score(Dealer); // 딜러 카드의 숫자 합
-	//printf("Player : %d, Dealer : %d \n", Player_score, Dealer_score); // 테스트용 스코어 출력
 
 	if (Player_score == 21)
 		printf("BlackJakc! Player Win!!\n"); // 처음받은 카드 2장의 합이 21이면 바로 승리
@@ -171,7 +178,7 @@ int main(void)
 	{
 		while(Player_score <21) // 카드의 합이 21이하면 카드를 더 받을지 hit을 출력하며 물어보는 함수 호출
 		{
-			if (more())
+			if (more("hit?"))
 			{
 				printf("  %c %c\n", deck->card.shape, deck->card.value); // 받을 카드 출력
 				hit(&deck, Player); // 카드를 추가
