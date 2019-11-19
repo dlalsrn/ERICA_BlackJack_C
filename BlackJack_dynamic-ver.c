@@ -67,18 +67,18 @@ void hit(node** head, node* deck) // 덱에서 카드 한장을 반환해주는 
 	Add_Node(deck, card); // 플레이어나 딜러의 덱에 card를 한장 추가
 }
 
-int more(char* message) // hit을 할때 더 hit할건지 물어보는 함수
+int more(char* message) // 메세지를 출력하면서 y/n을 물어보는 함수
 {
 	char ch;
-	printf("%s (y/n) : ", message);
-	scanf(" %c", &ch);
 	do
 	{
+		printf("%s (y/n) : ", message);
+		scanf(" %c", &ch);
 		if (ch == 'y')
 			return 1; // y를 입력했으면 1을 반환, 아니면 0 반환
 		else if (ch == 'n')
 			return 0;
-		else
+		else // y나 n이 아닌 다른 값을 입력하면 정상적인 값을 입력할 때까지 무한 루프
 			printf("y나 n을 입력해주십시오\n");
 	}while (1);
 }
@@ -123,7 +123,7 @@ int score(node* deck)
 void Create_deck(node* deck) // 메인 함수에서 생성하는 52장의 카드 덱을 하나의 함수로 구현
 {
 	char Shape[] = {'S', 'D', 'H', 'C'}; 
-	char Number[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
+	char Number[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'}; // 10은 T로 대체
 	for (int i = 0; i < 4; i++)
     {
         for (int s = 0; s < 13; s++)
@@ -138,12 +138,7 @@ void Create_deck(node* deck) // 메인 함수에서 생성하는 52장의 카드
 
 int main(void)
 {
-	/*
-	char Shape[] = {'S', 'D', 'H', 'C'};
-	char Number[] = {'A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K'};
-	// 숫자 10을 영어 Ten의 T로 지정
-	*/
-	node* deck = (node*)malloc(sizeof(node)); // 카드 덱 동적할당을 위해 선언한 deck 포인터
+	node* deck = (node*)malloc(sizeof(node)); // 카드 덱 동적할당을 위해 선언한 node형 deck 포인터
 	deck->card.shape = 0; // 아무것도 안받은 상태로 초기화
 	node* Player = (node*)malloc(sizeof(node)); // 플레이어의 덱
 	node* Dealer = (node*)malloc(sizeof(node)); // 딜러의 덱
@@ -151,7 +146,7 @@ int main(void)
 	Dealer->card.shape = 0; //            ' '
 	int Player_score = 0; // 플레이어의 카드 덱 숫자의 합
 	int Dealer_score = 0; // 딜러의 카드 덱 숫자의 합
-	printf("Welcome to Casino!! \n\n");
+	printf("Welcome to BlackJack!! \n\n");
 	
 	Create_deck(deck); // 새로운 52장의 카드 덱 생성
 	ary_shuffle(deck); // 순서대로 만들어진 52장의 카드를 무작위로 섞어주는 함수 호출
@@ -163,7 +158,7 @@ int main(void)
 	}
 	
 	printf("Dealer cards\n"); // 딜러의 첫 카드는 안보여주고 두 번째 카드만 보여줌
-	printf("  **** ** \n");
+	printf("  * * \n");
 	printf("  %c %c \n\n", (Dealer->next)->card.shape, (Dealer->next)->card.value);
 
 	printf("Player cards\n");
